@@ -2,8 +2,8 @@ $here = Split-Path -Parent $MyInvocation.MyCommand.Path
 $sut = (Split-Path -Leaf $MyInvocation.MyCommand.Path) -replace '.Tests.', '.'
 . "$here\$sut"
 
-Describe "Get-MachineInfo" {
-	It "should return object over CIM" {
+describe 'Get-MachineInfo' {
+	it 'should return object over CIM' {
 		$params = @{
 			'ComputerName' ='localhost'
 			'Protocol'     ='Wsman'
@@ -13,18 +13,18 @@ Describe "Get-MachineInfo" {
 		$result.computername | Should Be 'localhost'
 	}
 
-	It "should not allow WMI as protocol" {
+	it 'should not allow WMI as protocol' {
 		{ Get-MachineInfo -Protocol WMI } | Should Throw
 	}
 
-	It "should write error log" {
+	it 'should write error log' {
 		$params = @{
-			'ComputerName' ='FAIL'
-			'LogFailuresToPath'='TESTDRIVE:\fails.txt'
+			'ComputerName'      ='FAIL'
+			'LogFailuresToPath' ='TESTDRIVE:\fails.txt'
 			'Protocol'          ='Wsman'
 		}
 
 		Get-MachineInfo @params
-		Get-Content TESTDRIVE:\fails.txt | Should Be "FAIL"
+		Get-Content TESTDRIVE:\fails.txt | Should Be 'FAIL'
 	}
 }
