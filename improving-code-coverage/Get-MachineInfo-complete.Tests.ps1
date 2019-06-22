@@ -48,8 +48,6 @@ describe 'Get-MachineInfo' {
 
     mock 'Remove-CimSession'
 
-    mock 'Write-Warning'
-
     mock 'Out-File'
 
     it 'allows multiple computer names to be passed to it' {
