@@ -155,56 +155,64 @@ describe 'Get-MachineInfo' {
 		$result[1].Arch | should be 'Addrwidth'
 	}
 
-	context 'When the function calls itself' {
-
-		it 'when an exception is thrown when querying a computer, and ProtocolFallBack is used, and WSMAN is used as the Protocol, it should call itself using the DCOM protocol' {
-			mock 'New-CimSession' { throw }
-
-			mock 'Get-MachineInfo' { } -ParameterFilter { $Protocol -eq 'DCOM' }
-
-			$result = Get-MachineInfo -ComputerName FOO -Protocol WSMAN -ProtocolFallBack
-			$assMParams = @{
-				CommandName = 'Get-MachineInfo'
-				Times       = 1
-				Exactly     = $true
-				Scope       = 'It'
-			}
-			Assert-MockCalled @assMParams
-		}
-
-		it 'when an exception is thrown when querying a computer, and ProtocolFallBack is used, and DCOM is used as the Protocol, it should call itself using the WSMAN protocol' {
-
-			mock 'Get-MachineInfo' { } -ParameterFilter { $Protocol -eq 'WSMAN' }
-
-			$result = Get-MachineInfo -ComputerName FOO -Protocol DCOM -ProtocolFallBack
-			$assMParams = @{
-				CommandName = 'Get-MachineInfo'
-				Times       = 1
-				Exactly     = $true
-				Scope       = 'It'
-			}
-			Assert-MockCalled @assMParams
-		}
-
-		it 'when an exception is thrown when querying a computer, and ProtocolFallBack and LogFailuresToPath are used, it should call itself using the LogFailuresToPath parameter' {
-
-			mock 'Get-MachineInfo' { } -ParameterFilter { $LogFailuresToPath -eq 'C:\Path' }
-
-			$result = Get-MachineInfo -ComputerName FOO -ProtocolFallBack -LogFailuresToPath 'C:\Path'
-
-			$assMParams = @{
-				CommandName = 'Get-MachineInfo'
-				Times       = 1
-				Exactly     = $true
-				Scope       = 'It'
-			}
-			Assert-MockCalled @assMParams
-		}
-	}
-
 	context 'When the function throws an exception' {
 
 		mock 'New-CimSession' { throw }
+
+		context 'when an exception is thrown when querying a computer, and ProtocolFallBack is used, and WSMAN is used as the Protocol' {
+
+			mock 'Get-MachineInfo' { } -ParameterFilter { $Protocol -eq 'DCOM' }
+
+			it 'when an exception is thrown when querying a computer, and ProtocolFallBack and LogFailuresToPath are used, it should call itself using the DCOM protocol' {
+
+				$result = Get-MachineInfo -ComputerName FOO -Protocol WSMAN -ProtocolFallBack
+
+				$assMParams = @{
+					CommandName = 'Get-MachineInfo'
+					Times       = 1
+					Exactly     = $true
+					Scope       = 'It'
+				}
+				Assert-MockCalled @assMParams
+
+			}
+		}
+
+		context 'when an exception is thrown when querying a computer, and ProtocolFallBack is used, and DCOM is used as the Protocol' {
+
+			mock 'Get-MachineInfo' { } -ParameterFilter { $Protocol -eq 'WSMAN' }
+
+			it 'when an exception is thrown when querying a computer, and ProtocolFallBack is used, and DCOM is used as the Protocol, it should call itself using the WSMAN protocol' {
+
+				$result = Get-MachineInfo -ComputerName FOO -Protocol DCOM -ProtocolFallBack
+
+				$assMParams = @{
+					CommandName = 'Get-MachineInfo'
+					Times       = 1
+					Exactly     = $true
+					Scope       = 'It'
+				}
+				Assert-MockCalled @assMParams
+			}
+		}
+
+		context 'when an exception is thrown when querying a computer, and ProtocolFallBack and LogFailuresToPath are used' {
+
+			mock 'Get-MachineInfo' { } -ParameterFilter { $LogFailuresToPath -eq 'C:\Path' }
+
+			it 'when an exception is thrown when querying a computer, and ProtocolFallBack and LogFailuresToPath are used, it should call itself using the LogFailuresToPath parameter' {
+
+				$result = Get-MachineInfo -ComputerName FOO -ProtocolFallBack -LogFailuresToPath 'C:\Path'
+
+				$assMParams = @{
+					CommandName = 'Get-MachineInfo'
+					Times       = 1
+					Exactly     = $true
+					Scope       = 'It'
+				}
+				Assert-MockCalled @assMParams
+			}
+		}
 
 		it 'when an exception is thrown when querying a computer, and ProtocolFallBack is not used, and LogFailuresToPath is used, it writes the computer name to a file' {
 			$result = Get-MachineInfo -ComputerName FOO -LogFailuresToPath 'C:\Path'
