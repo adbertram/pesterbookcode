@@ -285,20 +285,6 @@ describe 'Get-MachineInfo' {
             Assert-MockCalled @assMParams
 
         }
-
-        it 'when an exception is thrown when querying a computer, it should write a warning to the console for each computer' {
-
-            $result = Get-MachineInfo -ComputerName FOO -LogFailuresToPath 'C:\Path'
-
-            $assMParams = @{
-                CommandName = 'Write-Warning'
-                Times = 1
-                Exactly = $true
-                Scope = 'It'
-                ParameterFilter = {$Message -match 'FAILED' }
-            }
-            Assert-MockCalled @assMParams
-        }
     }
 
     it 'should return a single pscustomobject for each computer provided' {
