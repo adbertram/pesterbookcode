@@ -124,7 +124,6 @@ function Get-MachineInfo {
 				Write-Output $obj
 	
 			} catch {
-				Write-Warning "FAILED $computer on $Protocol"
 		
 				# Did I specify protocol fallback?
 				# If so, try again. If I specified logging,
