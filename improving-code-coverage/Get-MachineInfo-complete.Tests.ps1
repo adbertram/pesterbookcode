@@ -13,35 +13,38 @@ describe 'Get-MachineInfo' {
 
 	mock 'Get-CimInstance' {
 		@{
-			SystemDrive             = 'C:' 
-			Version                 = 'ver' 
-			ServicePackMajorVersion = 'spver' 
-			BuildNumber             = 'buildnum' 
-		} 
-	} -ParameterFilter { $ClassName -eq 'Win32_ComputerSystem' }
-
-	mock 'Get-CimInstance' {
-		@{
-			Freespace = 'freespacehere'
-		} 
-	} -ParameterFilter { $ClassName -eq 'Win32_OperatingSystem' }
-
-	mock 'Get-CimInstance' {
-		@{ 
+			Manufacturer              = 'manhere'
 			Model                     = 'modelhere' 
 			NumberOfProcessors        = 'numberofprocshere'
 			NumberOfLogicalProcessors = 'numlogprocshere'
 			TotalPhysicalMemory       = '1000' 
 		} 
-	} -ParameterFilter { $ClassName -eq 'Win32_LogicalDisk' }
+	} -ParameterFilter { $PSBoundParameters.ClassName -eq 'Win32_ComputerSystem' }
+
+	mock 'Get-CimInstance' {
+		@{
+			Freespace               = 'freespacehere'
+			SystemDrive             = 'C:' 
+			Version                 = 'ver' 
+			ServicePackMajorVersion = 'spver' 
+			BuildNumber             = 'buildnum'
+		} 
+	} -ParameterFilter { $PSBoundParameters.ClassName -eq 'Win32_OperatingSystem' }
+
+	mock 'Get-CimInstance' {
+		@{ 
+			Freespace = 'freespacehere'
+		} 
+	} -ParameterFilter { $PSBoundParameters.ClassName -eq 'Win32_LogicalDisk' }
 
 	mock 'Get-CimInstance' {
 		@{ AddressWidth = 'Addrwidth' } 
 		@{ AddressWidth = 'Addrwidth2' } 
-	} -ParameterFilter { $ClassName -eq 'Win32_Processor' }
+	} -ParameterFilter { $PSBoundParameters.ClassName -eq 'Win32_Processor' }
 
 	mock 'Remove-CimSession'
 	mock 'Out-File'
+	mock 'Write-Verbose'
 
 	it 'allows multiple computer names to be passed to it' {
 		{ $null = Get-MachineInfo -ComputerName FOO, FOO1, FOO2 } | should not throw
@@ -58,7 +61,7 @@ describe 'Get-MachineInfo' {
 			Times           = 1
 			Exactly         = $true
 			Scope           = 'It'
-			ParameterFilter = { $Protocol -eq 'Dcom' }
+			ParameterFilter = { $PSBoundParameters.Protocol -eq 'Dcom' }
 		}
 		Assert-MockCalled @assMParams
 	}
@@ -70,7 +73,7 @@ describe 'Get-MachineInfo' {
 			Times           = 1
 			Exactly         = $true
 			Scope           = 'It'
-			ParameterFilter = { $Protocol -eq 'Wsman' }
+			ParameterFilter = { $PSBoundParameters.Protocol -eq 'Wsman' }
 
 		}
 		Assert-MockCalled @assMParams
@@ -85,7 +88,7 @@ describe 'Get-MachineInfo' {
 				Times           = 1
 				Exactly         = $true
 				Scope           = 'It'
-				ParameterFilter = { $ComputerName -eq $comp }
+				ParameterFilter = { $PSBoundParameters.ComputerName -eq $comp }
 			}
 			Assert-MockCalled @assMParams
 		}
@@ -99,7 +102,7 @@ describe 'Get-MachineInfo' {
 			Times           = @($computers).Count
 			Exactly         = $true
 			Scope           = 'It'
-			ParameterFilter = { $ClassName -eq 'Win32_ComputerSystem' }
+			ParameterFilter = { $PSBoundParameters.ClassName -eq 'Win32_ComputerSystem' }
 		}
 		Assert-MockCalled @assMParams
 	}
@@ -112,7 +115,7 @@ describe 'Get-MachineInfo' {
 			Times           = @($computers).Count
 			Exactly         = $true
 			Scope           = 'It'
-			ParameterFilter = { $ClassName -eq 'Win32_OperatingSystem' }
+			ParameterFilter = { $PSBoundParameters.ClassName -eq 'Win32_OperatingSystem' }
 		}
 
 		Assert-MockCalled @assMParams
@@ -126,7 +129,7 @@ describe 'Get-MachineInfo' {
 			Times           = @($computers).Count
 			Exactly         = $true
 			Scope           = 'It'
-			ParameterFilter = { $ClassName -eq 'Win32_LogicalDisk' }
+			ParameterFilter = { $PSBoundParameters.ClassName -eq 'Win32_LogicalDisk' }
 		}
 
 		Assert-MockCalled @assMParams
@@ -140,7 +143,7 @@ describe 'Get-MachineInfo' {
 			Times           = @($computers).Count
 			Exactly         = $true
 			Scope           = 'It'
-			ParameterFilter = { $ClassName -eq 'Win32_Processor' }
+			ParameterFilter = { $PSBoundParameters.ClassName -eq 'Win32_Processor' }
 		}
 		Assert-MockCalled @assMParams
 	}
@@ -148,7 +151,8 @@ describe 'Get-MachineInfo' {
 	it 'should only return the first instance of the Win32_Processor CIM class on each computer provided' {
 		$computers = 'FOO1', 'FOO2'
 		$result = Get-MachineInfo -ComputerName $computers
-		$result.Arch | should be 'Addrwidth'
+		$result[0].Arch | should be 'Addrwidth'
+		$result[1].Arch | should be 'Addrwidth'
 	}
 
 	context 'When the function calls itself' {
@@ -210,8 +214,8 @@ describe 'Get-MachineInfo' {
 				Exactly         = $true
 				Scope           = 'It'
 				ParameterFilter = {
-					$FilePath -eq 'C:\Path' -and
-					$InputObject -eq 'FOO'
+					$PSBoundParameters.FilePath -eq 'C:\Path' -and
+					$PSBoundParameters.InputObject -eq 'FOO'
 				}
 			}
 			Assert-MockCalled @assMParams
@@ -235,7 +239,7 @@ describe 'Get-MachineInfo' {
 			$obj.Model | should be 'modelhere'
 			$obj.Procs | should be 'numberofprocshere'
 			$obj.Cores | should be 'numlogprocshere'
-			$obj.RAM | should be '1.9073486328125E-06'
+			$obj.RAM | should be '9.31322574615479E-07'
 			$obj.Arch | should be 'Addrwidth'
 			$obj.SysDriveFreeSpace | should be 'freespacehere'
 		}
