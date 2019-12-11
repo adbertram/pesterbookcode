@@ -1,3 +1,7 @@
 variables:
-- foo: foo
+  var1: value1
 
+jobs:
+- job: One
+  steps:
+    - bash: echo $(var1) 
