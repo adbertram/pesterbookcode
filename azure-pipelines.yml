@@ -4,4 +4,6 @@ variables:
 jobs:
 - job: One
   steps:
-    - bash: echo $(var1) 
+    - bash: echo "##vso[task.setvariable variable=value2]crushed tomatoes"
+    - bash: echo $(var1)
+    - bash: echo $(value2)
