@@ -1,6 +1,15 @@
 variables:
-  var1: 'defined in variables'
+  global_variable: value  # this is a global available to all stages and jobs
 
-  steps:
-    - bash: echo "##vso[task.setvariable variable=var2] pipeline var defined in the script environment"
-    - bash: echo "##vso[task.getvariable variable=var2]"
+stages:
+- stage: Build
+  variables:
+    stage_variable1: value3 # available in Build stage and all jobs
+  jobs:
+  - job: BuildJob
+    variables:
+      job_variable1: value1    # this is only available in BuildJob
+    steps:
+    - bash: echo $(stage_variable1) ## works
+    - bash: echo $(global_variable) ## works
+    - bash: echo $(job_variable1) ## works
