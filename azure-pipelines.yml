@@ -1,9 +1,6 @@
 variables:
-  var1: value1
+  var1: 'defined in variables'
 
-jobs:
-- job: One
   steps:
-    - bash: echo "##vso[task.setvariable variable=value2]crushed tomatoes"
-    - bash: echo $(var1)
-    - bash: echo $(value2)
+    - bash: echo "##vso[task.setvariable variable=var2] pipeline var defined in the script environment"
+    - bash: echo "##vso[task.getvariable variable=var2]"
